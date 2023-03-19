@@ -4,6 +4,7 @@ import os
 class FpsGenTool:
     def __init__(self):
         #self.tree=etree.parse(os.path.dirname(__file__)+'fps-framework.xml')
+        self.problem_cnt=0
         self.tree=etree.parse('fps-framework.xml')
         # item
         self.tpl_item=self.tree.getroot().find('item')
@@ -14,10 +15,14 @@ class FpsGenTool:
         # test_output
         self.tpl_test_output=self.tpl_item.find('test_output')
         self.tpl_item.remove(self.tpl_test_output)
+        # solution
+        self.tpl_solution=self.tpl_item.find('solution')
+        self.tpl_item.remove(self.tpl_solution)
         
         self.tpl_item_str=etree.tostring(self.tpl_item)
         self.tpl_test_input_str=etree.tostring(self.tpl_test_input)
         self.tpl_test_output_str=etree.tostring(self.tpl_test_output)
+        self.tpl_solution_str=etree.tostring(self.tpl_solution)
     def add_problem(self,
                     title,
                     time_limit,
@@ -62,8 +67,13 @@ class FpsGenTool:
         if source: # 题目来源
             new_item.find('source').text=source
         if solution: # 标准程序
-            new_item.find('solution').text=solution
+            elem=etree.fromstring(self.tpl_solution_str)
+            elem.text=solution
+            new_item.append(elem)
         self.tree.getroot().append(new_item)
+        self.problem_cnt+=1
+    def count(self):
+        return self.problem_cnt
     def dump(self,filename):
         self.tree.write(filename,pretty_print=True)
     def __str__(self):
