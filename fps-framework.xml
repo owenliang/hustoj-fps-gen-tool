@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE fps PUBLIC "-//freeproblemset//An opensource XML standard for Algorithm Contest Problem Set//EN" "http://hustoj.com/fps.current.dtd">
+
+<fps version="1.5" url="https://github.com/zhblue/freeproblemset/">
+	<generator name="HUSTOJ" url="https://github.com/zhblue/hustoj/" />
+	<item>
+		<title><![CDATA[]]></title>
+		<time_limit unit="s"><![CDATA[]]></time_limit>
+		<memory_limit unit="mb"><![CDATA[]]></memory_limit>
+		<description><![CDATA[]]></description>
+		<input><![CDATA[]]></input>
+		<output><![CDATA[]]></output>
+		<sample_input><![CDATA[]]></sample_input>
+		<sample_output><![CDATA[]]></sample_output>
+		<test_input name="test0"><![CDATA[]]></test_input>
+		<test_output name="test0"><![CDATA[]]></test_output>
+		<hint><![CDATA[]]></hint>
+		<source><![CDATA[]]></source>
+		<solution language="C++"><![CDATA[]]></solution>
+	</item>
+</fps>
