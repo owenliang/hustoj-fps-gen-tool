@@ -36,7 +36,8 @@ class FpsGenTool:
                     test_output=None,
                     hint=None,
                     source=None,
-                    solution=None):
+                    solution=None,
+                    img=None):
         new_item=etree.fromstring(self.tpl_item_str)
         new_item.find('title').text=title
         new_item.find('time_limit').text=time_limit
@@ -70,6 +71,12 @@ class FpsGenTool:
             elem=etree.fromstring(self.tpl_solution_str)
             elem.text=solution
             new_item.append(elem)
+        if img: # 图片内联替换
+            for img_item in img:
+                elem=etree.fromstring('''<img><src/><base64/></img>''')
+                elem.find('src').text=img_item[0]
+                elem.find('base64').text=img_item[1]
+                new_item.append(elem)
         self.tree.getroot().append(new_item)
         self.problem_cnt+=1
     def count(self):
