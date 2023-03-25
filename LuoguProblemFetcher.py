@@ -25,13 +25,16 @@ class LuoguProblemFetcher:
         options.add_argument('--headless')
         browser = webdriver.Chrome(options=options)
         browser.get(problem_url)
+        browser.implicitly_wait(3)
         # 展开标签
         tag_btn=browser.find_element(By.CSS_SELECTOR, '.expand-tip')
         tag_btn.click()
         html=browser.page_source
 
-        json_data=re.search('JSON.parse\\(decodeURIComponent\\("(.+)"',html).group(1)
-        json_data=json.loads(urllib.parse.unquote(json_data))
+        html=html.replace('class="katex"','class="katex katex-no-js"')
+
+        #json_data=re.search('JSON.parse\\(decodeURIComponent\\("(.+)"',html).group(1)
+        #json_data=json.loads(urllib.parse.unquote(json_data))
 
         soup=BeautifulSoup(html,features='lxml')
         # 标题
@@ -59,9 +62,6 @@ class LuoguProblemFetcher:
         for item in pdetail.find_all('div')[1].contents:
             if item.name not in ['h2','div']:
                 continue
-            # 添加Katex渲染排除类
-            for katex_item in item.find_all(class_='katex'):
-                katex_item['class']='katex katex-no-js'
             if item.name=='h2':
                 key=item.string.strip()
             elif item.name=='div':
@@ -118,7 +118,7 @@ class LuoguProblemFetcher:
 if __name__=='__main__':
     fetcher=LuoguProblemFetcher()
     problem=fetcher.fetch('P1043')
-    print(problem)
+    #print(problem)
     hint_href="<a href='%s'>原题链接</a>"%problem['url']
     
     tool=FpsGenTool()
@@ -136,4 +136,4 @@ if __name__=='__main__':
                     source=problem['source'],
                     img=problem['img'])
     tool.dump('result.xml')
-    print(tool)
+    #print(tool)
