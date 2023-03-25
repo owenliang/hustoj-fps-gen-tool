@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import base64
 
 # https://oj.czos.cn/p/1416
+# https://oj.czos.cn/p/1029
 
 class CzosProblemFetcher:
     def __init__(self):
@@ -23,7 +24,9 @@ class CzosProblemFetcher:
         title=pdetail.find('div').find('b').string
         pos=title.find('-')
         if pos!=-1:
-            title=title[pos+1:].strip()
+            title=title[pos+1:].strip()+'(东方博宜 - '+title[:pos]+')'
+        time_limit=1
+        memory_limit=128
         description=None
         input_=None 
         output=None
@@ -75,6 +78,21 @@ class CzosProblemFetcher:
                     test_output.append(sample_output)
                     self._gather_img(content_div,img_list)
                 key=''
+        # 题目参数(时间,内存,难度)
+        for info_tr in soup.find(class_='problem-info').find('table').find_all('tr',recursive=True):
+            tds=info_tr.find_all('td')
+            info_name=tds[0].text
+            info_value=tds[1].text.strip()
+            if info_name=='时间限制':
+                time_limit=info_value.replace('秒','').strip()
+            elif info_name=='内存限制':
+                memory_limit=info_value.replace('MB','').strip()
+            elif info_name=='难度':
+                if source:
+                    source=source+' '+info_value
+                else:
+                    source=info_value
+
         # 图片内联
         for i in range(len(img_list)):
             url=img_list[i] 
@@ -87,6 +105,8 @@ class CzosProblemFetcher:
         return {
             'id': id,
             'title': title,
+            'time_limit':time_limit,
+            'memory_limit':memory_limit,
             'description': description,
             'input_': input_,
             'output': output,
@@ -102,14 +122,14 @@ class CzosProblemFetcher:
 
 if __name__=='__main__':
     fetcher=CzosProblemFetcher()
-    problem=fetcher.fetch(1336)
-    #print(problem)
+    problem=fetcher.fetch(1029)
+    print(problem)
     hint_href="<a href='%s'>原题链接</a>"%problem['url']
 
     tool=FpsGenTool()
     tool.add_problem(problem['title'],
-                    '1',
-                    '128',
+                    problem['time_limit'],
+                    problem['memory_limit'],
                     problem['description'],
                     input_=problem['input_'],
                     output=problem['output'],

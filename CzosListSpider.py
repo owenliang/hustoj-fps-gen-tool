@@ -2,10 +2,14 @@ from FpsGenTool import FpsGenTool
 import requests
 from bs4 import BeautifulSoup
 from CzosProblemFetcher import  CzosProblemFetcher
+import json 
 
 # problem下载器
 fetcher=CzosProblemFetcher()
 tool=FpsGenTool()
+
+# 生成题单JSON
+problemset=[]
 
 # index翻页
 for page in range(1,16):
@@ -20,8 +24,8 @@ for page in range(1,16):
 
         hint_href="<a href='%s'>原题链接</a>"%problem['url']
         tool.add_problem(problem['title'],
-                        '1',
-                        '128',
+                        problem['time_limit'],
+                        problem['memory_limit'],
                         problem['description'],
                         input_=problem['input_'],
                         output=problem['output'],
@@ -32,4 +36,7 @@ for page in range(1,16):
                         hint=problem['hint']+'<br/>'+hint_href if problem['hint'] else hint_href,
                         source=problem['source'],
                         img=problem['img'])
+        problemset.append([problem_id,problem['title']])
 tool.dump('result.xml')
+with open('result.json','w') as fp:
+    json.dump(problemset, fp)

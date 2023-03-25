@@ -40,8 +40,8 @@ class FpsGenTool:
                     img=None):
         new_item=etree.fromstring(self.tpl_item_str)
         new_item.find('title').text=title
-        new_item.find('time_limit').text=time_limit
-        new_item.find('memory_limit').text=memory_limit
+        new_item.find('time_limit').text=str(time_limit)
+        new_item.find('memory_limit').text=str(memory_limit)
         new_item.find('description').text=description
         if input_:
             new_item.find('input').text=input_
