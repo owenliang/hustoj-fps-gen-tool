@@ -1,27 +1,34 @@
 from FpsGenTool import FpsGenTool
 import requests
 from bs4 import BeautifulSoup
-from CzosProblemFetcher import  CzosProblemFetcher
+from LuoguProblemFetcher import  LuoguProblemFetcher
 import json 
+import time 
 
 # problem下载器
-fetcher=CzosProblemFetcher()
+fetcher=LuoguProblemFetcher()
 tool=FpsGenTool()
 
 # 生成题单JSON
 problemset=[]
 
 # index翻页
-for page in range(1,16):
-    url='https://oj.czos.cn/problem/index?page=%d&per-page=100'%page
-    index_html=requests.get(url).text 
+for page in range(1,162): # 1,162
+    url='https://www.luogu.com.cn/problem/list?page=%d'%page
+    index_html=requests.get(url,headers={'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'}).text 
     soup=BeautifulSoup(index_html,features='lxml')
-    problem_table=soup.find('table',class_='problem-index-list')
-    for problem_tr in problem_table.find('tbody').find_all('tr'):
-        problem_id=int(problem_tr.get('data-key'))
-        problem=fetcher.fetch(problem_id)
-        print(page,problem_id)
-
+    problem_table=soup.find('div',id='app')
+    for problem_li in problem_table.find('ul',recursive=True).find_all('li'):
+        problem_id=problem_li.find('a').get('href')
+        while True: # 洛谷有限速，失败了重试就好
+            try:
+                problem=fetcher.fetch(problem_id)
+                print(page,problem_id)
+            except:
+                print('失败', problem_id)
+                time.sleep(15)
+            else:
+                break
         hint_href="<a href='%s'>原题链接</a>"%problem['url']
         tool.add_problem(problem['title'],
                         problem['time_limit'],
@@ -37,4 +44,5 @@ for page in range(1,16):
                         source=problem['source'],
                         img=problem['img'])
         problemset.append([problem_id,problem['title']])
-tool.dump('czos.xml')
+        time.sleep(1)
+tool.dump('luogu.xml')

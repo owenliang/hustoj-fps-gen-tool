@@ -14,27 +14,28 @@ class LuoguProblemFetcher:
     def __init__(self):
         self.base_headers={'user-agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'}
 
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        self.browser = webdriver.Chrome(options=options)
+
     def _gather_img(self, parent, img_list):
         for img in parent.find_all('img', recursive=True):
             img_list.append(img.get('src'))
 
     def fetch(self,id):
         problem_url='https://www.luogu.com.cn/problem/%s'%id
-
-        options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        browser = webdriver.Chrome(options=options)
-        browser.get(problem_url)
-        browser.implicitly_wait(3)
+        self.browser.get(problem_url)
+        #self.browser.implicitly_wait(3)
         # 展开标签
-        tag_btn=browser.find_element(By.CSS_SELECTOR, '.expand-tip')
+        tag_btn=self.browser.find_element(By.CSS_SELECTOR, '.expand-tip')
         tag_btn.click()
-        html=browser.page_source
+        html=self.browser.page_source
 
         html=html.replace('class="katex"','class="katex katex-no-js"')
 
-        #json_data=re.search('JSON.parse\\(decodeURIComponent\\("(.+)"',html).group(1)
-        #json_data=json.loads(urllib.parse.unquote(json_data))
+        json_data=re.search('JSON.parse\\(decodeURIComponent\\("(.+)"',html).group(1)
+        json_data=json.loads(urllib.parse.unquote(json_data))
+        limits=json_data['currentData']['problem']['limits']
 
         soup=BeautifulSoup(html,features='lxml')
         # 标题
@@ -44,8 +45,8 @@ class LuoguProblemFetcher:
         # 核心区域
         pdetail=soup.find(class_='problem-card')
 
-        time_limit=1
-        memory_limit=128
+        time_limit=max(limits['time'])//1000
+        memory_limit=max(limits['memory'])//1024
         description=None
         input_=None 
         output=None
@@ -54,9 +55,16 @@ class LuoguProblemFetcher:
         test_input=[]
         test_output=[]
         hint=None # 提示
-        source=None # 来源
+        source=[] # 来源
         img_list=[]#涉及图片
 
+        # 标签
+        tags_wrap=soup.find('div',class_='tags-wrap',recursive=True)
+        if tags_wrap:
+            for tag_div in soup.find('div',class_='tags-wrap').find_all('a'):
+                source.append(tag_div.find('span').string)
+            source=' '.join(source)
+        
         # 扫描problem-card第2个div
         key=''
         for item in pdetail.find_all('div')[1].contents:
@@ -117,7 +125,7 @@ class LuoguProblemFetcher:
         }
 if __name__=='__main__':
     fetcher=LuoguProblemFetcher()
-    problem=fetcher.fetch('P1043')
+    problem=fetcher.fetch('P1371')
     #print(problem)
     hint_href="<a href='%s'>原题链接</a>"%problem['url']
     
@@ -135,5 +143,5 @@ if __name__=='__main__':
                     hint=problem['hint']+'<br/>'+hint_href if problem['hint'] else hint_href,
                     source=problem['source'],
                     img=problem['img'])
-    tool.dump('result.xml')
+    tool.dump('luogu.xml')
     #print(tool)

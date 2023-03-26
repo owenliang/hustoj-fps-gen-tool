@@ -140,5 +140,5 @@ if __name__=='__main__':
                     hint=problem['hint']+'<br/>'+hint_href if problem['hint'] else hint_href,
                     source=problem['source'],
                     img=problem['img'])
-    tool.dump('result.xml')
+    tool.dump('czos.xml')
     print(tool)
